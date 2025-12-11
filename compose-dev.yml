@@ -1,0 +1,45 @@
+---
+services:
+  localstack:
+    image: localstack/localstack:latest
+    ports:
+      - "4567:4566"
+    environment:
+      - SERVICES=s3:4566
+      - HOSTNAME=localstack
+      - HOSTNAME_EXTERNAL=localstack
+      - DEFAULT_REGION=us-east-1
+
+  setup-resources:
+    image: amazon/aws-cli
+    depends_on:
+      - localstack
+    environment:
+      - AWS_ACCESS_KEY_ID=test
+      - AWS_SECRET_ACCESS_KEY=test
+      - AWS_DEFAULT_REGION=us-east-1
+    entrypoint: >
+      /bin/sh -c "
+      echo 'Waiting for LocalStack...';
+      sleep 5;
+
+      echo 'Creating bucket...';
+      aws --endpoint-url=http://localstack:4566 s3 mb s3://mysamplebucket;
+
+      echo 'Generating and uploading files...';
+      for i in \$(seq 1 10); do
+        dd if=/dev/urandom of=/tmp/dummy_\$i.dat bs=1024 count=\$((i*100)) 2>/dev/null;
+
+        # 1. Backups Folder: Mixed Classes
+        echo 'Uploading to backups/ ...';
+        aws --endpoint-url=http://localstack:4566 s3api put-object --bucket mysamplebucket --key backups/q_cold_\$i.dat --body /tmp/dummy_\$i.dat --storage-class GLACIER;
+        aws --endpoint-url=http://localstack:4566 s3api put-object --bucket mysamplebucket --key backups/standard_\$i.dat --body /tmp/dummy_\$i.dat --storage-class STANDARD;
+
+        # 2. Data Folder: Mixed Classes
+        echo 'Uploading to data/ ...';
+        aws --endpoint-url=http://localstack:4566 s3api put-object --bucket mysamplebucket --key data/q_cold_\$i.dat --body /tmp/dummy_\$i.dat --storage-class GLACIER;
+        aws --endpoint-url=http://localstack:4566 s3api put-object --bucket mysamplebucket --key data/standard_\$i.dat --body /tmp/dummy_\$i.dat --storage-class STANDARD;
+      done;
+
+      echo 'Setup complete.';
+      "

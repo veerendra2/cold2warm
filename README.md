@@ -1,26 +1,47 @@
-# My Go Project Template
+# cold2warm
 
-> Other references
->
-> - https://github.com/thockin/go-build-template/tree/master
-> - https://peter.bourgon.org/go-best-practices-2016/
+A CLI tool to bulk-restore S3 objects from archival storage classes using concurrent goroutines.
 
-## TODO
+## Usage
 
-- [ ] Update your app name in:
-  - [ ] [Taskfile.yml](./Taskfile.yml)
-  - [ ] [Dockerfile](./Dockerfile)
-  - [ ] [main.go](./main.go)
-- [ ] Update the `main.go` file location in:
-  - [ ] [Taskfile.yml](./Taskfile.yml)
-  - [ ] [.goreleaser.yml](./.goreleaser.yml)
-- [ ] Initialize your Go module:
-  ```bash
-  go mod init YOUR_MODULE_NAME
-  go mod tidy
-  ```
+```bash
+cold2warm --help
+Usage: cold2warm --s3-endpoint=STRING --s3-access-key=STRING --s3-secret-key=STRING --s3-bucket-name=STRING [flags]
 
-## Build & Test
+A CLI tool to bulk-restore S3 objects from archival storage classes using concurrent goroutines.
+
+Flags:
+  -h, --help                     Show context-sensitive help.
+      --s3-region="nl-ams"       The region where the S3 bucket is hosted (e.g., nl-ams) ($S3_REGION).
+      --s3-endpoint=STRING       Custom S3 endpoint URL (e.g., s3.nl-ams.scw.cloud). Do NOT include the bucket name ($S3_ENDPOINT).
+      --s3-access-key=STRING     The access key ID for S3 authentication ($S3_ACCESS_KEY).
+      --s3-secret-key=STRING     The secret access key for S3 authentication ($S3_SECRET_KEY).
+      --s3-bucket-name=STRING    The name of the target S3 bucket ($S3_BUCKET_NAME).
+      --s3-days=30               Number of days to keep the restored object ($S3_RESTORE_DAYS)
+      --s3-prefix=""             Filter objects by this prefix (e.g., 'backups/') ($S3_OBJECT_PREFIX).
+      --worker-count=10          Number of worker goroutines ($WORKER_COUNT)
+      --log-format="json"        Set the output format of the logs. Must be "console" or "json" ($LOG_FORMAT).
+      --log-level=INFO           Set the log level. Must be "DEBUG", "INFO", "WARN" or "ERROR" ($LOG_LEVEL).
+      --log-add-source           Whether to add source file and line number to log records ($LOG_ADD_SOURCE).
+```
+
+## Local Development
+
+### Test Locally
+
+Start [localstack](https://github.com/localstack/localstack)
+
+```bash
+docker compose -f compose-dev.yml up
+```
+
+Start program
+
+```bash
+task run
+```
+
+### Build & Test
 
 - Using [Taskfile](https://taskfile.dev/)
 
@@ -53,3 +74,11 @@ _Install GoReleaser: [Installation Guide](https://goreleaser.com/install/)_
 goreleaser release --snapshot --clean
 ...
 ```
+
+## References
+
+- [aws-doc-sdk-examples](https://github.com/awsdocs/aws-doc-sdk-examples/tree/main/go/example_code/s3)
+- [Amazon S3 ListObjectsV2 Example](https://github.com/aws/aws-sdk-go-v2/tree/main/example/service/s3/listObjects)
+- [Configure Client Endpoints](https://docs.aws.amazon.com/sdk-for-go/v2/developer-guide/configure-endpoints.html)
+- [Configure the SDK](https://docs.aws.amazon.com/sdk-for-go/v2/developer-guide/configure-gosdk.html)
+- [Performing Basic Amazon S3 Bucket Operations](https://docs.aws.amazon.com/sdk-for-go/v1/developer-guide/s3-example-basic-bucket-operations.html)
