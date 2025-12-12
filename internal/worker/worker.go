@@ -54,7 +54,7 @@ func StreamObjects(ctx context.Context, p *s3.ListObjectsV2Paginator) <-chan str
 	return objects
 }
 
-func Start(ctx context.Context, cfg Config, s3Client bucketmgr.Client) error {
+func Start(ctx context.Context, cfg Config, s3Client bucketmgr.Client) {
 	var wg sync.WaitGroup
 
 	paginator := s3Client.ListObjectsPaginator(ctx)
@@ -78,5 +78,4 @@ func Start(ctx context.Context, cfg Config, s3Client bucketmgr.Client) error {
 	}
 	wg.Wait()
 
-	return ctx.Err()
 }

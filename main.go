@@ -49,14 +49,10 @@ func main() {
 	}
 
 	slog.Info("Starting worker pool... Press Ctrl+C to stop.", "count", cli.Worker.WorkersCount)
-	err = worker.Start(ctx, cli.Worker, s3Client)
-	if err != nil {
-		if ctx.Err() == context.Canceled {
-			slog.Error("Operation cancelled by user")
-			return
-		}
-		slog.Error("Failed to start worker pool", "error", err)
-		kongCtx.Exit(1)
+	worker.Start(ctx, cli.Worker, s3Client)
+	if ctx.Err() == context.Canceled {
+		slog.Error("Operation cancelled by user")
+		return
 	}
 	slog.Info("Job completed successfully")
 }

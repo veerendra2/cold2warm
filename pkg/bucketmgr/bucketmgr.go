@@ -51,7 +51,7 @@ func (c *client) RestoreObject(ctx context.Context, object string) error {
 func (c *client) ListObjectsPaginator(ctx context.Context) *s3.ListObjectsV2Paginator {
 	maxKeys := int32(32)
 
-	paginator := s3.NewListObjectsV2Paginator(&c.s3Client, &s3.ListObjectsV2Input{
+	paginator := s3.NewListObjectsV2Paginator(c.s3Client, &s3.ListObjectsV2Input{
 		Bucket:  &c.bucketName,
 		Prefix:  &c.objectPrefix,
 		MaxKeys: &maxKeys,
