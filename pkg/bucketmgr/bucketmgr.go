@@ -25,11 +25,11 @@ type Config struct {
 
 type Client interface {
 	RestoreObject(ctx context.Context, object string) error
-	ListObjectsPaginator(ctx context.Context) (*s3.ListObjectsV2Paginator, error)
+	ListObjectsPaginator(ctx context.Context) *s3.ListObjectsV2Paginator
 }
 
 type client struct {
-	s3Client s3.Client
+	s3Client *s3.Client
 
 	bucketName   string
 	days         int32
@@ -44,23 +44,20 @@ func (c *client) RestoreObject(ctx context.Context, object string) error {
 			Days: aws.Int32(c.days),
 		}},
 	)
-	if err != nil {
-		return err
-	}
 
-	return nil
+	return err
 }
 
-func (c *client) ListObjectsPaginator(ctx context.Context) (*s3.ListObjectsV2Paginator, error) {
+func (c *client) ListObjectsPaginator(ctx context.Context) *s3.ListObjectsV2Paginator {
 	maxKey := int32(32)
 
-	paginator := s3.NewListObjectsV2Paginator(&c.s3Client, &s3.ListObjectsV2Input{
+	paginator := s3.NewListObjectsV2Paginator(c.s3Client, &s3.ListObjectsV2Input{
 		Bucket:  &c.bucketName,
 		Prefix:  &c.objectPrefix,
 		MaxKeys: &maxKey,
 	})
 
-	return paginator, nil
+	return paginator
 }
 
 func NewClient(ctx context.Context, cfg Config) (Client, error) {
@@ -88,7 +85,7 @@ func NewClient(ctx context.Context, cfg Config) (Client, error) {
 	})
 
 	return &client{
-		s3Client: *s3Client,
+		s3Client: s3Client,
 
 		bucketName:   cfg.BucketName,
 		days:         cfg.Days,

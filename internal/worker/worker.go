@@ -15,7 +15,7 @@ type Config struct {
 	WorkersCount int `name:"count" help:"Number of worker goroutines" env:"COUNT" default:"10"`
 }
 
-func StreamObjects(ctx context.Context, p *s3.ListObjectsV2Paginator) (<-chan string, error) {
+func StreamObjects(ctx context.Context, p *s3.ListObjectsV2Paginator) <-chan string {
 	objects := make(chan string, 32)
 
 	go func() {
@@ -51,21 +51,14 @@ func StreamObjects(ctx context.Context, p *s3.ListObjectsV2Paginator) (<-chan st
 		}
 	}()
 
-	return objects, nil
+	return objects
 }
 
 func Start(ctx context.Context, cfg Config, s3Client bucketmgr.Client) error {
 	var wg sync.WaitGroup
 
-	p, err := s3Client.ListObjectsPaginator(ctx)
-	if err != nil {
-		return err
-	}
-
-	objChan, err := StreamObjects(ctx, p)
-	if err != nil {
-		return err
-	}
+	paginator := s3Client.ListObjectsPaginator(ctx)
+	objChan := StreamObjects(ctx, paginator)
 
 	wg.Add(cfg.WorkersCount)
 	for range cfg.WorkersCount {
@@ -74,7 +67,7 @@ func Start(ctx context.Context, cfg Config, s3Client bucketmgr.Client) error {
 
 			for obj := range objChan {
 				slog.Debug("Restoring", "object", obj)
-				reqCtx, cancel := context.WithTimeout(ctx, 1*time.Minute)
+				reqCtx, cancel := context.WithTimeout(ctx, 5*time.Second)
 				err := s3Client.RestoreObject(reqCtx, obj)
 				cancel()
 				if err != nil {
