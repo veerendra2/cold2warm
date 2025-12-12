@@ -11,4 +11,4 @@ RUN apk update && apk add --no-cache ca-certificates
 WORKDIR /
 COPY --from=app_builder /app/dist/cold2warm .
 USER nobody
-ENTRYPOINT ["/cold2warm]
+ENTRYPOINT ["/cold2warm"]
