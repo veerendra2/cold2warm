@@ -44,7 +44,7 @@ func main() {
 	// Create s3 client
 	s3Client, err := bucketmgr.NewClient(initCtx, cli.S3)
 	if err != nil {
-		slog.Error("Failed to create client", "err", err)
+		slog.Error("Failed to create client", "error", err)
 		kongCtx.Exit(1)
 	}
 
