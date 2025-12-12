@@ -17,7 +17,7 @@ Flags:
       --s3-access-key=STRING     The access key ID for S3 authentication ($S3_ACCESS_KEY).
       --s3-secret-key=STRING     The secret access key for S3 authentication ($S3_SECRET_KEY).
       --s3-bucket-name=STRING    The name of the target S3 bucket ($S3_BUCKET_NAME).
-      --s3-days=30               Number of days to keep the restored object ($S3_RESTORE_DAYS)
+      --s3-days=30               Number of days to keep the restored object. ($S3_RESTORE_DAYS)
       --s3-prefix=""             Filter objects by this prefix (e.g., 'backups/') ($S3_OBJECT_PREFIX).
       --worker-count=10          Number of worker goroutines ($WORKER_COUNT)
       --log-format="json"        Set the output format of the logs. Must be "console" or "json" ($LOG_FORMAT).
