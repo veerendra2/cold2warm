@@ -9,6 +9,6 @@ RUN /app/bin/task build
 FROM alpine:3.22.2
 RUN apk update && apk add --no-cache ca-certificates
 WORKDIR /
-COPY --from=app_builder /app/dist/your-app-name .
+COPY --from=app_builder /app/dist/cold2warm .
 USER nobody
-ENTRYPOINT ["/your-app-name]
+ENTRYPOINT ["/cold2warm"]
