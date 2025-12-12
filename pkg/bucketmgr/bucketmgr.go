@@ -19,7 +19,7 @@ type Config struct {
 	SecretKey  string `name:"secret-key" help:"The secret access key for S3 authentication." env:"SECRET_KEY" required:""`
 	BucketName string `name:"bucket-name" help:"The name of the target S3 bucket." env:"BUCKET_NAME" required:""`
 
-	Days         int32  `name:"days" help:"Number of days to keep the restored object" env:"RESTORE_DAYS" default:"30"`
+	Days         int32  `name:"days" help:"Number of days to keep the restored object." env:"RESTORE_DAYS" default:"30"`
 	ObjectPrefix string `name:"prefix" help:"Filter objects by this prefix (e.g., 'backups/')." env:"OBJECT_PREFIX" default:""`
 }
 
