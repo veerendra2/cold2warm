@@ -8,7 +8,7 @@ A CLI tool to bulk-restore S3 objects from archival storage classes using concur
 cold2warm --help
 Usage: cold2warm --s3-endpoint=STRING --s3-access-key=STRING --s3-secret-key=STRING --s3-bucket-name=STRING [flags]
 
-A CLI tool to bulk-restore S3 objects from archival storage classes using concurrent goroutines.
+A CLI tool to bulk-restore S3 objects from archival storage classes using concurrent Go goroutines.
 
 Flags:
   -h, --help                     Show context-sensitive help.
@@ -27,52 +27,30 @@ Flags:
 
 ## Local Development
 
-### Test Locally
-
-Start [localstack](https://github.com/localstack/localstack)
-
 ```bash
-docker compose -f compose-dev.yml up
-```
+# Deploy localstack (https://github.com/localstack/localstack)
+docker compose -f compose-dev.yml up -d
 
-Start program
-
-```bash
+# Run the app (https://taskfile.dev/)
 task run
-```
-
-### Build & Test
-
-- Using [Taskfile](https://taskfile.dev/)
-
-_Install Taskfile: [Installation Guide](https://taskfile.dev/docs/installation)_
-
-```bash
-# List available tasks
-task --list
-task: Available tasks for this project:
-* build:                 Build the application binary for the current platform
-* build-platforms:       Build the application binaries for multiple platforms and architectures
-* fmt:                   Formats all Go source files
-* run:                   Runs the main application
-* test:                  Runs all tests in the project      (aliases: tests)
-* vet:                   Examines Go source code and reports suspicious constructs
 
 # Build the application
 task build
 
-# Run tests
-task test
-```
-
-- Build with [goreleaser](https://goreleaser.com/)
-
-_Install GoReleaser: [Installation Guide](https://goreleaser.com/install/)_
-
-```bash
-# Build locally
-goreleaser release --snapshot --clean
-...
+# List available tasks
+task --list
+task: Available tasks for this project:
+* all:                   Run comprehensive checks: format, lint, security and test
+* build:                 Build the application binary for the current platform
+* build-docker:          Build Docker image
+* build-platforms:       Build the application binaries for multiple platforms and architectures
+* fmt:                   Formats all Go source files
+* install:               Install required tools and dependencies
+* lint:                  Run static analysis and code linting using golangci-lint
+* run:                   Runs the main application
+* security:              Run security vulnerability scan
+* test:                  Runs all tests in the project      (aliases: tests)
+* vet:                   Examines Go source code and reports suspicious constructs
 ```
 
 ## References

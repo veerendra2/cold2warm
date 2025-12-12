@@ -12,8 +12,6 @@ import (
 	"github.com/aws/aws-sdk-go-v2/service/s3/types"
 )
 
-const ArchiveStorageClassName = "GLACIER"
-
 type Config struct {
 	Region     string `name:"region" help:"The region where the S3 bucket is hosted (e.g., nl-ams)." env:"REGION" default:"nl-ams"`
 	Endpoint   string `name:"endpoint" help:"Custom S3 endpoint URL (e.g., s3.nl-ams.scw.cloud). Do NOT include the bucket name." env:"ENDPOINT" required:""`

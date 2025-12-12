@@ -31,15 +31,15 @@ tasks:
       - go run {{.MAIN_FILE}}
     env:
       LOG_FORMAT: console
-      LOG_ADD_SOURCE: false
-      LOG_LEVEL: info
-      S3_REGION: nl-ams
+      LOG_ADD_SOURCE: true
+      LOG_LEVEL: debug
+      S3_REGION: us-east-1
       S3_ENDPOINT: http://localhost:4567
       S3_ACCESS_KEY: test
       S3_SECRET_KEY: test
-      S3_BUCKET_NAME: test-bucket
+      S3_BUCKET_NAME: mysamplebucket
       S3_RESTORE_DAYS: 1
-      S3_OBJECT_PREFIX: backups/q*
+      S3_OBJECT_PREFIX: backups/q
       WORKER_COUNT: 10
 
   lint:

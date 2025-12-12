@@ -26,7 +26,7 @@ var cli struct {
 func main() {
 	kongCtx := kong.Parse(&cli,
 		kong.Name(appName),
-		kong.Description("A CLI tool to bulk-restore S3 objects from archival storage classes using concurrent Go goroutines."),
+		kong.Description("A CLI tool to bulk-restore S3 objects from archival storage classes using concurrent goroutines."),
 	)
 
 	kongCtx.FatalIfErrorf(kongCtx.Error)
@@ -44,7 +44,7 @@ func main() {
 	// Create s3 client
 	s3Client, err := bucketmgr.NewClient(initCtx, cli.S3)
 	if err != nil {
-		slog.Error("failed to create client", "err", err)
+		slog.Error("Failed to create client", "err", err)
 		kongCtx.Exit(1)
 	}
 
@@ -52,9 +52,11 @@ func main() {
 	err = worker.Start(ctx, cli.Worker, s3Client)
 	if err != nil {
 		if ctx.Err() == context.Canceled {
+			slog.Error("Operation cancelled by user")
 			return
 		}
-		slog.Error("failed to start worker pool", "error", err)
+		slog.Error("Failed to start worker pool", "error", err)
 		kongCtx.Exit(1)
 	}
+	slog.Info("Job completed successfully")
 }
