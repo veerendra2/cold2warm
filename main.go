@@ -48,7 +48,14 @@ func main() {
 		kongCtx.Exit(1)
 	}
 
-	slog.Info("Starting worker pool... Press Ctrl+C to stop.", "count", cli.Worker.WorkersCount)
+	slog.Info("Starting Glacier object restoration",
+		"workers", cli.Worker.WorkersCount,
+		"bucket", cli.S3.BucketName,
+		"region", cli.S3.Region,
+		"prefix", cli.S3.ObjectPrefix,
+		"restore_duration_days", cli.S3.Days,
+	)
+	slog.Info("Press Ctrl+C to gracefully stop")
 	worker.Start(ctx, cli.Worker, s3Client)
 	if ctx.Err() == context.Canceled {
 		slog.Error("Operation cancelled by user")
