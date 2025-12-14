@@ -30,7 +30,7 @@ Flags:
 Homebrew
 
 ```bash
-brew install --cask veerendra2/tap/quotations
+brew install --cask veerendra2/tap/cold2warm
 ```
 
 Download binaries
