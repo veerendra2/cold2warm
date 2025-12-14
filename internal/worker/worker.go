@@ -75,7 +75,7 @@ func Start(ctx context.Context, cfg Config, s3Client bucketmgr.Client) {
 						slog.Debug("Worker finished, channel closed")
 						return
 					}
-					time.Sleep(5 * time.Second)
+
 					slog.Debug("Restoring", "object", obj)
 					reqCtx, cancel := context.WithTimeout(ctx, 10*time.Second)
 					err := s3Client.RestoreObject(reqCtx, obj)
