@@ -57,4 +57,4 @@ homebrew_casks:
       owner: veerendra2
       name: homebrew-tap
       branch: main
-      token: "{{ .Env.AUTH_TOKEN }}"
+      token: "{{ .secrets.GITHUB_TOKEN }}"
