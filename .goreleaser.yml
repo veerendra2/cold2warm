@@ -39,9 +39,22 @@ changelog:
       - "^docs:"
       - "^test:"
 
-release:
-  footer: >-
-
-    ---
-
-    Released by [GoReleaser](https://github.com/goreleaser/goreleaser).
+homebrew_casks:
+  - name: cold2warm
+    directory: Casks
+    homepage: "https://github.com/veerendra2/cold2warm"
+    description: "A CLI tool to bulk-restore S3 objects from archival storage classes using concurrent goroutines."
+    url:
+      verified: github.com/veerendra2/cold2warm
+      template: "https://github.com/veerendra2/cold2warm/releases/download/{{ .Tag }}/{{ .ArtifactName }}"
+    hooks:
+      post:
+        install: |
+          if OS.mac?
+            system_command "/usr/bin/xattr", args: ["-dr", "com.apple.quarantine", "#{staged_path}/cold2warm"]
+          end
+    repository:
+      owner: veerendra2
+      name: homebrew-tap
+      branch: main
+      token: "{{ .Env.GITHUB_TOKEN }}"

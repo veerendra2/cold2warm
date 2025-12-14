@@ -65,15 +65,27 @@ func Start(ctx context.Context, cfg Config, s3Client bucketmgr.Client) {
 		go func() {
 			defer wg.Done()
 
-			for obj := range objChan {
-				slog.Debug("Restoring", "object", obj)
-				reqCtx, cancel := context.WithTimeout(ctx, 5*time.Second)
-				err := s3Client.RestoreObject(reqCtx, obj)
-				cancel()
-				if err != nil {
-					slog.Warn("failed to restore", "object", obj, "error", err)
+			for {
+				select {
+				case <-ctx.Done():
+					slog.Info("Worker stopped due to cancellation")
+					return
+				case obj, ok := <-objChan:
+					if !ok {
+						slog.Debug("Worker finished, channel closed")
+						return
+					}
+
+					slog.Debug("Restoring", "object", obj)
+					reqCtx, cancel := context.WithTimeout(ctx, 10*time.Second)
+					err := s3Client.RestoreObject(reqCtx, obj)
+					cancel()
+					if err != nil {
+						slog.Warn("failed to restore", "object", obj, "error", err)
+					}
 				}
 			}
+
 		}()
 	}
 	wg.Wait()

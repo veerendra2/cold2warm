@@ -25,6 +25,24 @@ Flags:
       --log-add-source           Whether to add source file and line number to log records ($LOG_ADD_SOURCE).
 ```
 
+## Installation
+
+Homebrew
+
+```bash
+brew install --cask veerendra2/tap/quotations
+```
+
+Download binaries
+
+```bash
+LATEST_VERSION=$(curl -s https://api.github.com/repos/veerendra2/cold2warm/releases/latest | jq -r '.tag_name')
+curl -sL -o /tmp/cold2warm.tar.gz https://github.com/veerendra2/cold2warm/releases/download/${LATEST_VERSION}/cold2warm_$(uname -s | tr '[:upper:]' '[:lower:]')_$(arch).zip
+unzip /tmp/cold2warm.zip -d /tmp
+chmod +x /tmp/cold2warm
+sudo mv /tmp/cold2warm /usr/local/bin/
+```
+
 ## Local Development
 
 ```bash
