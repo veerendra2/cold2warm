@@ -4,6 +4,7 @@ import (
 	"context"
 	"log/slog"
 	"sync"
+	"sync/atomic"
 	"time"
 
 	"github.com/aws/aws-sdk-go-v2/service/s3"
@@ -12,7 +13,8 @@ import (
 )
 
 type Config struct {
-	WorkersCount int `name:"count" help:"Number of worker goroutines" env:"COUNT" default:"10"`
+	WorkersCount int  `name:"count" help:"Number of worker goroutines" env:"COUNT" default:"10"`
+	DryRun       bool `name:"dry-run" help:"Simulate operations without actually restoring objects" env:"DRY_RUN" default:"false"`
 }
 
 func StreamObjects(ctx context.Context, p *s3.ListObjectsV2Paginator) <-chan string {
@@ -56,6 +58,11 @@ func StreamObjects(ctx context.Context, p *s3.ListObjectsV2Paginator) <-chan str
 
 func Start(ctx context.Context, cfg Config, s3Client bucketmgr.Client) {
 	var wg sync.WaitGroup
+	var totalObjects int64
+
+	if cfg.DryRun {
+		slog.Info("DRY RUN MODE: No objects will actually be restored")
+	}
 
 	paginator := s3Client.ListObjectsPaginator(ctx)
 	objChan := StreamObjects(ctx, paginator)
@@ -75,19 +82,26 @@ func Start(ctx context.Context, cfg Config, s3Client bucketmgr.Client) {
 						slog.Debug("Worker finished, channel closed")
 						return
 					}
-
-					slog.Debug("Restoring", "object", obj)
-					reqCtx, cancel := context.WithTimeout(ctx, 10*time.Second)
-					err := s3Client.RestoreObject(reqCtx, obj)
-					cancel()
-					if err != nil {
-						slog.Warn("failed to restore", "object", obj, "error", err)
+					if cfg.DryRun {
+						slog.Info("DRY RUN: Would restore object", "object", obj)
+						atomic.AddInt64(&totalObjects, 1)
+					} else {
+						slog.Debug("Restoring", "object", obj)
+						reqCtx, cancel := context.WithTimeout(ctx, 10*time.Second)
+						err := s3Client.RestoreObject(reqCtx, obj)
+						cancel()
+						if err != nil {
+							slog.Warn("failed to restore", "object", obj, "error", err)
+						} else {
+							atomic.AddInt64(&totalObjects, 1)
+						}
 					}
+
 				}
 			}
 
 		}()
 	}
 	wg.Wait()
-
+	slog.Info("Total glacier objects restored", "count", atomic.LoadInt64(&totalObjects))
 }
