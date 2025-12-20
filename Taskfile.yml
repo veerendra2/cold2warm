@@ -25,6 +25,8 @@ env:
 tasks:
   run:
     desc: "Runs the main application"
+    dotenv:
+      - .env
     deps:
       - vet
     cmds:
@@ -32,7 +34,7 @@ tasks:
     env:
       LOG_FORMAT: console
       LOG_ADD_SOURCE: true
-      LOG_LEVEL: debug
+      # LOG_LEVEL: debug
       # S3_REGION: us-east-1
       # S3_ENDPOINT: http://localhost:4567
       # S3_ACCESS_KEY: test

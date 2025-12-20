@@ -54,8 +54,9 @@ func main() {
 		"region", cli.S3.Region,
 		"prefix", cli.S3.ObjectPrefix,
 		"restore_duration_days", cli.S3.Days,
+		"dry_run", cli.Worker.DryRun,
 	)
-	slog.Info("Press Ctrl+C to gracefully stop")
+
 	worker.Start(ctx, cli.Worker, s3Client)
 	if ctx.Err() == context.Canceled {
 		slog.Error("Operation cancelled by user")
