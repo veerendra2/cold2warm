@@ -8,7 +8,7 @@ A CLI tool to bulk-restore S3 objects from archival storage classes using concur
 cold2warm --help
 Usage: cold2warm --s3-endpoint=STRING --s3-access-key=STRING --s3-secret-key=STRING --s3-bucket-name=STRING [flags]
 
-A CLI tool to bulk-restore S3 objects from archival storage classes using concurrent Go goroutines.
+A CLI tool to bulk-restore S3 objects from archival storage classes using concurrent goroutines.
 
 Flags:
   -h, --help                     Show context-sensitive help.
@@ -17,9 +17,10 @@ Flags:
       --s3-access-key=STRING     The access key ID for S3 authentication ($S3_ACCESS_KEY).
       --s3-secret-key=STRING     The secret access key for S3 authentication ($S3_SECRET_KEY).
       --s3-bucket-name=STRING    The name of the target S3 bucket ($S3_BUCKET_NAME).
-      --s3-days=30               Number of days to keep the restored object. ($S3_RESTORE_DAYS)
+      --s3-days=30               Number of days to keep the restored object ($S3_RESTORE_DAYS).
       --s3-prefix=""             Filter objects by this prefix (e.g., 'backups/') ($S3_OBJECT_PREFIX).
       --worker-count=10          Number of worker goroutines ($WORKER_COUNT)
+      --worker-dry-run           Simulate operations without actually restoring objects ($WORKER_DRY_RUN)
       --log-format="json"        Set the output format of the logs. Must be "console" or "json" ($LOG_FORMAT).
       --log-level=INFO           Set the log level. Must be "DEBUG", "INFO", "WARN" or "ERROR" ($LOG_LEVEL).
       --log-add-source           Whether to add source file and line number to log records ($LOG_ADD_SOURCE).
