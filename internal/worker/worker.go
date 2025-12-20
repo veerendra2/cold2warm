@@ -83,7 +83,7 @@ func Start(ctx context.Context, cfg Config, s3Client bucketmgr.Client) {
 						return
 					}
 					if cfg.DryRun {
-						slog.Info("DRY RUN: Would restore object", "object", obj)
+						slog.Info("DRY RUN: Would restore", "object", obj)
 						atomic.AddInt64(&totalObjects, 1)
 					} else {
 						slog.Debug("Restoring", "object", obj)
