@@ -82,21 +82,22 @@ func Start(ctx context.Context, cfg Config, s3Client bucketmgr.Client) {
 						slog.Debug("Worker finished, channel closed")
 						return
 					}
+
 					if cfg.DryRun {
 						slog.Info("DRY RUN: Would restore", "object", obj)
-						atomic.AddInt64(&totalObjects, 1)
 					} else {
 						slog.Debug("Restoring", "object", obj)
 						reqCtx, cancel := context.WithTimeout(ctx, 10*time.Second)
 						err := s3Client.RestoreObject(reqCtx, obj)
 						cancel()
+
 						if err != nil {
 							slog.Warn("failed to restore", "object", obj, "error", err)
-						} else {
-							atomic.AddInt64(&totalObjects, 1)
+							continue
 						}
 					}
 
+					atomic.AddInt64(&totalObjects, 1)
 				}
 			}
 
