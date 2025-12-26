@@ -8,6 +8,7 @@ require (
 	github.com/aws/aws-sdk-go-v2/config v1.32.5
 	github.com/aws/aws-sdk-go-v2/credentials v1.19.5
 	github.com/aws/aws-sdk-go-v2/service/s3 v1.93.2
+	github.com/dustin/go-humanize v1.0.1
 	github.com/veerendra2/gopackages v1.2.2
 )
 

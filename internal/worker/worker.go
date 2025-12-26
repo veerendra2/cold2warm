@@ -3,12 +3,14 @@ package worker
 import (
 	"context"
 	"log/slog"
+	"strings"
 	"sync"
 	"sync/atomic"
 	"time"
 
 	"github.com/aws/aws-sdk-go-v2/service/s3"
 	"github.com/aws/aws-sdk-go-v2/service/s3/types"
+	humanize "github.com/dustin/go-humanize"
 	"github.com/veerendra2/cold2warm/pkg/bucketmgr"
 )
 
@@ -17,8 +19,21 @@ type Config struct {
 	DryRun       bool `name:"dry-run" help:"Simulate operations without actually restoring objects" env:"DRY_RUN" default:"false"`
 }
 
-func StreamObjects(ctx context.Context, p *s3.ListObjectsV2Paginator) <-chan string {
-	objects := make(chan string, 32)
+type Summary struct {
+	AvgObjectSize              int64
+	FailedRestore              int64
+	InProgressRestore          int64
+	TotalInProgressObjectsSize int64
+	TotalObjects               int64
+	TotalObjectsSize           int64
+}
+type objectInfo struct {
+	key  string
+	size int64
+}
+
+func StreamObjects(ctx context.Context, p *s3.ListObjectsV2Paginator) <-chan objectInfo {
+	objects := make(chan objectInfo, 32)
 
 	go func() {
 		defer close(objects)
@@ -28,7 +43,7 @@ func StreamObjects(ctx context.Context, p *s3.ListObjectsV2Paginator) <-chan str
 			page, err := p.NextPage(pageCtx)
 			cancel()
 			if err != nil {
-				slog.Error("failed to get next page", "error", err)
+				slog.Error("Failed to get next page", "error", err)
 				return
 			}
 
@@ -43,11 +58,16 @@ func StreamObjects(ctx context.Context, p *s3.ListObjectsV2Paginator) <-chan str
 					continue
 				}
 
+				objInfo := objectInfo{
+					key:  *obj.Key,
+					size: *obj.Size,
+				}
+
 				select {
 				case <-ctx.Done():
 					return
-				case objects <- *obj.Key:
-					slog.Debug("Found", "object", *obj.Key)
+				case objects <- objInfo:
+					slog.Debug("Found", "object", objInfo.key, "size", objInfo.size)
 				}
 			}
 		}
@@ -58,7 +78,7 @@ func StreamObjects(ctx context.Context, p *s3.ListObjectsV2Paginator) <-chan str
 
 func Start(ctx context.Context, cfg Config, s3Client bucketmgr.Client) {
 	var wg sync.WaitGroup
-	var totalObjects int64
+	var summary Summary
 
 	if cfg.DryRun {
 		slog.Info("DRY RUN MODE: No objects will actually be restored")
@@ -84,25 +104,42 @@ func Start(ctx context.Context, cfg Config, s3Client bucketmgr.Client) {
 					}
 
 					if cfg.DryRun {
-						slog.Info("DRY RUN: Would restore", "object", obj)
+						slog.Debug("DRY RUN: Would restore", "object", obj.key, "size", obj.size)
 					} else {
 						slog.Debug("Restoring", "object", obj)
 						reqCtx, cancel := context.WithTimeout(ctx, 10*time.Second)
-						err := s3Client.RestoreObject(reqCtx, obj)
+						err := s3Client.RestoreObject(reqCtx, obj.key)
 						cancel()
 
 						if err != nil {
-							slog.Warn("failed to restore", "object", obj, "error", err)
-							continue
+							if strings.Contains(err.Error(), "RestoreAlreadyInProgress") {
+								atomic.AddInt64(&summary.InProgressRestore, 1)
+								atomic.AddInt64(&summary.TotalInProgressObjectsSize, obj.size)
+								slog.Debug("Restore already in progress", "object", obj.key, "size", obj.size)
+							} else {
+								atomic.AddInt64(&summary.FailedRestore, 1)
+								slog.Warn("Failed to restore", "object", obj, "size", obj.size, "error", err)
+							}
 						}
 					}
-
-					atomic.AddInt64(&totalObjects, 1)
+					atomic.AddInt64(&summary.TotalObjects, 1)
+					atomic.AddInt64(&summary.TotalObjectsSize, obj.size)
 				}
 			}
 
 		}()
 	}
 	wg.Wait()
-	slog.Info("Total glacier objects restored", "count", atomic.LoadInt64(&totalObjects))
+	if summary.TotalObjects > 0 {
+		summary.AvgObjectSize = summary.TotalObjectsSize / summary.TotalObjects
+	}
+
+	slog.Info("Summary",
+		"avg_obj_size", humanize.Bytes(uint64(summary.AvgObjectSize)),
+		"failed_restore_count", summary.FailedRestore,
+		"inprogress_restore_count", summary.InProgressRestore,
+		"total_inprogress_object_size", humanize.Bytes(uint64(summary.TotalInProgressObjectsSize)),
+		"total_objects_count", summary.TotalObjects,
+		"total_objects_size", humanize.Bytes(uint64(summary.TotalObjectsSize)),
+	)
 }
