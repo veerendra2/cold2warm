@@ -1,6 +1,24 @@
 # cold2warm
 
+> **Note:** This tool was created to explore Go concurrency patterns with goroutines. For production use cases, you might prefer established tools like [s3cmd](https://s3tools.org/s3cmd) or [AWS CLI](https://aws.amazon.com/cli/), which have extensive documentation and community support available online.
+
 A CLI tool to bulk-restore S3 objects from archival storage classes using concurrent goroutines.
+
+## Features
+
+- Uses Go goroutines to request glacier object restore operations
+- Supports dry run mode for testing
+- Displays comprehensive summary with the following metrics (shown in structured logs):
+  | Metric | Description | Available in Dry Run |
+  |--------|-------------|---------------------|
+  | `total_objects_count` | Total number of Glacier objects found in the bucket | Yes |
+  | `total_objects_size` | Combined size of all Glacier objects (human-readable format) | Yes |
+  | `avg_obj_size` | Average size per Glacier object (human-readable format) | Yes |
+  | `inprogress_restore_count` | Number of objects with `RestoreAlreadyInProgress` status | No |
+  | `total_inprogress_object_size` | Combined size of objects already being restored (human-readable format) | No |
+  | `failed_restore_count` | Number of failed restore requests (excluding in-progress) | No |
+
+> **Note:** All metrics are displayed in structured log format as key-value pairs in the final summary message.
 
 ## Usage
 
@@ -24,6 +42,17 @@ Flags:
       --log-format="json"        Set the output format of the logs. Must be "console" or "json" ($LOG_FORMAT).
       --log-level=INFO           Set the log level. Must be "DEBUG", "INFO", "WARN" or "ERROR" ($LOG_LEVEL).
       --log-add-source           Whether to add source file and line number to log records ($LOG_ADD_SOURCE).
+```
+
+Example output
+
+```bash
+task run
+time=2025-12-26T20:06:20+01:00 level=INFO msg="Version information" version="" branch="" revision=""
+time=2025-12-26T20:06:20+01:00 level=INFO msg="Build context" go_version=go1.25.5 user="" date=""
+time=2025-12-26T20:06:20+01:00 level=INFO msg="Starting Glacier object restoration" workers=20 bucket=REDACTED region=REDACTED prefix=immich restore_duration_days=3 dry_run=false
+time=2025-12-26T20:06:36+01:00 level=INFO msg=Summary avg_obj_size="24 MB" failed_restore_count=0 inprogress_restore_count=1877 total_inprogress_object_size="44 GB" total_objects_count=1877 total_objects_size="44 GB"
+time=2025-12-26T20:06:36+01:00 level=INFO msg="Job completed successfully"
 ```
 
 ## Installation
