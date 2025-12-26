@@ -8,15 +8,17 @@ A CLI tool to bulk-restore S3 objects from archival storage classes using concur
 
 - Uses Go goroutines to request glacier object restore operations
 - Supports dry run mode for testing
-- Displays comprehensive summary with the following information:
-  | Info | Description |
-  | --- | --- |
-  | `avg_obj_size` | Average object size of glacier objects |
-  | `failed_restore_count` | Total failed glacier object restore requests (excludes `RestoreAlreadyInProgress`) |
-  | `inprogress_restore_count` | Total `RestoreAlreadyInProgress` objects count |
-  | `total_inprogress_object_size` | Total size of all `RestoreAlreadyInProgress` objects |
-  | `total_objects_count` | Total glacier objects count |
-  | `total_objects_size` | Size of all glacier objects |
+- Displays comprehensive summary with the following metrics (shown in structured logs):
+  | Metric | Description | Available in Dry Run |
+  |--------|-------------|---------------------|
+  | `total_objects_count` | Total number of Glacier objects found in the bucket | Yes |
+  | `total_objects_size` | Combined size of all Glacier objects (human-readable format) | Yes |
+  | `avg_obj_size` | Average size per Glacier object (human-readable format) | Yes |
+  | `inprogress_restore_count` | Number of objects with `RestoreAlreadyInProgress` status | No |
+  | `total_inprogress_object_size` | Combined size of objects already being restored (human-readable format) | No |
+  | `failed_restore_count` | Number of failed restore requests (excluding in-progress) | No |
+
+> **Note:** All metrics are displayed in structured log format as key-value pairs in the final summary message.
 
 ## Usage
 

@@ -106,7 +106,7 @@ func Start(ctx context.Context, cfg Config, s3Client bucketmgr.Client) {
 					if cfg.DryRun {
 						slog.Debug("DRY RUN: Would restore", "object", obj.key, "size", obj.size)
 					} else {
-						slog.Debug("Restoring", "object", obj)
+						slog.Debug("Restoring", "object", obj.key, "size", obj.size)
 						reqCtx, cancel := context.WithTimeout(ctx, 10*time.Second)
 						err := s3Client.RestoreObject(reqCtx, obj.key)
 						cancel()
@@ -118,7 +118,7 @@ func Start(ctx context.Context, cfg Config, s3Client bucketmgr.Client) {
 								slog.Debug("Restore already in progress", "object", obj.key, "size", obj.size)
 							} else {
 								atomic.AddInt64(&summary.FailedRestore, 1)
-								slog.Warn("Failed to restore", "object", obj, "size", obj.size, "error", err)
+								slog.Warn("Failed to restore", "object", obj.key, "size", obj.size, "error", err)
 							}
 						}
 					}
