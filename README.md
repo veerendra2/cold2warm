@@ -31,7 +31,7 @@ A CLI tool to bulk-restore S3 objects from archival storage classes using concur
 
 Flags:
   -h, --help                     Show context-sensitive help.
-      --worker-count=10          Number of worker goroutines ($WROKER_COUNT)
+      --worker-count=10          Number of worker goroutines ($WORKER_COUNT)
       --dry-run                  Simulate operations without actually restoring objects ($DRY_RUN)
       --s3-region="nl-ams"       The region where the S3 bucket is hosted (e.g., nl-ams) ($S3_REGION).
       --s3-endpoint=STRING       Custom S3 endpoint URL (e.g., s3.nl-ams.scw.cloud). Do NOT include the bucket name ($S3_ENDPOINT).
