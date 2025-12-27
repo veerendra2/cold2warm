@@ -14,7 +14,7 @@ import (
 )
 
 type Config struct {
-	WorkersCount int  `name:"worker-count" help:"Number of worker goroutines" env:"WROKER_COUNT" default:"10"`
+	WorkersCount int  `name:"worker-count" help:"Number of worker goroutines" env:"WORKER_COUNT" default:"10"`
 	DryRun       bool `name:"dry-run" help:"Simulate operations without actually restoring objects" env:"DRY_RUN" default:"false"`
 }
 
