@@ -10,12 +10,11 @@ import (
 
 	"github.com/aws/aws-sdk-go-v2/service/s3"
 	"github.com/aws/aws-sdk-go-v2/service/s3/types"
-	humanize "github.com/dustin/go-humanize"
 	"github.com/veerendra2/cold2warm/pkg/bucketmgr"
 )
 
 type Config struct {
-	WorkersCount int  `name:"count" help:"Number of worker goroutines" env:"COUNT" default:"10"`
+	WorkersCount int  `name:"worker-count" help:"Number of worker goroutines" env:"WROKER_COUNT" default:"10"`
 	DryRun       bool `name:"dry-run" help:"Simulate operations without actually restoring objects" env:"DRY_RUN" default:"false"`
 }
 
@@ -76,7 +75,7 @@ func StreamObjects(ctx context.Context, p *s3.ListObjectsV2Paginator) <-chan obj
 	return objects
 }
 
-func Start(ctx context.Context, cfg Config, s3Client bucketmgr.Client) {
+func Start(ctx context.Context, cfg Config, s3Client bucketmgr.Client) Summary {
 	var wg sync.WaitGroup
 	var summary Summary
 
@@ -134,12 +133,5 @@ func Start(ctx context.Context, cfg Config, s3Client bucketmgr.Client) {
 		summary.AvgObjectSize = summary.TotalObjectsSize / summary.TotalObjects
 	}
 
-	slog.Info("Summary",
-		"avg_obj_size", humanize.Bytes(uint64(summary.AvgObjectSize)),
-		"failed_restore_count", summary.FailedRestore,
-		"inprogress_restore_count", summary.InProgressRestore,
-		"total_inprogress_object_size", humanize.Bytes(uint64(summary.TotalInProgressObjectsSize)),
-		"total_objects_count", summary.TotalObjects,
-		"total_objects_size", humanize.Bytes(uint64(summary.TotalObjectsSize)),
-	)
+	return summary
 }

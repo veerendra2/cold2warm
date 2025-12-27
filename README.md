@@ -14,6 +14,7 @@ A CLI tool to bulk-restore S3 objects from archival storage classes using concur
   | `total_objects_count` | Total number of Glacier objects found in the bucket | Yes |
   | `total_objects_size` | Combined size of all Glacier objects (human-readable format) | Yes |
   | `avg_obj_size` | Average size per Glacier object (human-readable format) | Yes |
+  | `elapsed_time` | Elapsed time | Yes |
   | `inprogress_restore_count` | Number of objects with `RestoreAlreadyInProgress` status | No |
   | `total_inprogress_object_size` | Combined size of objects already being restored (human-readable format) | No |
   | `failed_restore_count` | Number of failed restore requests (excluding in-progress) | No |
@@ -30,6 +31,8 @@ A CLI tool to bulk-restore S3 objects from archival storage classes using concur
 
 Flags:
   -h, --help                     Show context-sensitive help.
+      --worker-count=10          Number of worker goroutines ($WROKER_COUNT)
+      --dry-run                  Simulate operations without actually restoring objects ($DRY_RUN)
       --s3-region="nl-ams"       The region where the S3 bucket is hosted (e.g., nl-ams) ($S3_REGION).
       --s3-endpoint=STRING       Custom S3 endpoint URL (e.g., s3.nl-ams.scw.cloud). Do NOT include the bucket name ($S3_ENDPOINT).
       --s3-access-key=STRING     The access key ID for S3 authentication ($S3_ACCESS_KEY).
@@ -37,8 +40,6 @@ Flags:
       --s3-bucket-name=STRING    The name of the target S3 bucket ($S3_BUCKET_NAME).
       --s3-days=30               Number of days to keep the restored object ($S3_RESTORE_DAYS).
       --s3-prefix=""             Filter objects by this prefix (e.g., 'backups/') ($S3_OBJECT_PREFIX).
-      --worker-count=10          Number of worker goroutines ($WORKER_COUNT)
-      --worker-dry-run           Simulate operations without actually restoring objects ($WORKER_DRY_RUN)
       --log-format="json"        Set the output format of the logs. Must be "console" or "json" ($LOG_FORMAT).
       --log-level=INFO           Set the log level. Must be "DEBUG", "INFO", "WARN" or "ERROR" ($LOG_LEVEL).
       --log-add-source           Whether to add source file and line number to log records ($LOG_ADD_SOURCE).
@@ -48,11 +49,10 @@ Example output
 
 ```bash
 task run
-time=2025-12-26T20:06:20+01:00 level=INFO msg="Version information" version="" branch="" revision=""
-time=2025-12-26T20:06:20+01:00 level=INFO msg="Build context" go_version=go1.25.5 user="" date=""
-time=2025-12-26T20:06:20+01:00 level=INFO msg="Starting Glacier object restoration" workers=20 bucket=REDACTED region=REDACTED prefix=immich restore_duration_days=3 dry_run=false
-time=2025-12-26T20:06:36+01:00 level=INFO msg=Summary avg_obj_size="24 MB" failed_restore_count=0 inprogress_restore_count=1877 total_inprogress_object_size="44 GB" total_objects_count=1877 total_objects_size="44 GB"
-time=2025-12-26T20:06:36+01:00 level=INFO msg="Job completed successfully"
+time=2025-12-27T14:09:56+01:00 level=INFO msg="Version information" version="" branch="" revision=""
+time=2025-12-27T14:09:56+01:00 level=INFO msg="Build context" go_version=go1.25.5 user="" date=""
+time=2025-12-27T14:09:56+01:00 level=INFO msg="Starting Glacier object restoration" workers=20 bucket=REDACTED region=REDACTED prefix=immich restore_duration_days=3 dry_run=false
+time=2025-12-27T14:10:16+01:00 level=INFO msg=Summary avg_obj_size="23 MB" failed_restore_count=0 inprogress_restore_count=9528 elapsed_time=20s total_inprogress_object_size="220 GB" total_objects_count=9528 total_objects_size="220 GB"
 ```
 
 ## Installation
