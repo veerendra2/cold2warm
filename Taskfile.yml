@@ -34,7 +34,7 @@ tasks:
     env:
       LOG_FORMAT: console
       LOG_ADD_SOURCE: true
-      WORKER_DRY_RUN: false
+      DRY_RUN: false
       # LOG_LEVEL: debug
       # S3_REGION: us-east-1
       # S3_ENDPOINT: http://localhost:4567
