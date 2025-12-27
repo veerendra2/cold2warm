@@ -19,15 +19,19 @@ import (
 const appName = "cold2warm"
 
 var cli struct {
-	Worker worker.Config    `embed:""`
-	S3     bucketmgr.Config `embed:"" prefix:"s3-" envprefix:"S3_"`
-	Log    slogger.Config   `embed:"" prefix:"log-" envprefix:"LOG_"`
+	Worker  worker.Config    `embed:""`
+	S3      bucketmgr.Config `embed:"" prefix:"s3-" envprefix:"S3_"`
+	Log     slogger.Config   `embed:"" prefix:"log-" envprefix:"LOG_"`
+	Version kong.VersionFlag `name:"version" help:"Print version information and exit"`
 }
 
 func main() {
 	kongCtx := kong.Parse(&cli,
 		kong.Name(appName),
 		kong.Description("A CLI tool to bulk-restore S3 objects from archival storage classes using concurrent goroutines."),
+		kong.Vars{
+			"version": version.Version,
+		},
 	)
 
 	kongCtx.FatalIfErrorf(kongCtx.Error)
