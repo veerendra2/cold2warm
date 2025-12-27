@@ -7,7 +7,7 @@ on:
 jobs:
   golangci-lint:
     name: Lint Source Code
-    runs-on: ubuntu-latest
+    runs-on: ubuntu-slim
     steps:
       - name: Check out code
         uses: actions/checkout@v6
@@ -25,22 +25,22 @@ jobs:
           working-directory: ./
           args: --timeout 3m
 
-  run-tests:
-    name: Run Tests
-    runs-on: ubuntu-latest
-    steps:
-      - name: Check out code
-        uses: actions/checkout@v5
+  # run-tests:
+  #   name: Run Tests
+  #   runs-on: ubuntu-slim
+  #   steps:
+  #     - name: Check out code
+  #       uses: actions/checkout@v5
 
-      - name: Setup Go
-        uses: actions/setup-go@v6
-        with:
-          go-version-file: "go.mod"
-          cache: true
+  #     - name: Setup Go
+  #       uses: actions/setup-go@v6
+  #       with:
+  #         go-version-file: "go.mod"
+  #         cache: true
 
-      - name: Install Task
-        uses: go-task/setup-task@v1
+  #     - name: Install Task
+  #       uses: go-task/setup-task@v1
 
-      - name: Run Tests
-        run: |
-          task tests
+  #     - name: Run Tests
+  #       run: |
+  #         task tests

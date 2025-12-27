@@ -9,6 +9,7 @@ import (
 	"time"
 
 	"github.com/alecthomas/kong"
+	"github.com/dustin/go-humanize"
 	"github.com/veerendra2/cold2warm/internal/worker"
 	"github.com/veerendra2/cold2warm/pkg/bucketmgr"
 	"github.com/veerendra2/gopackages/slogger"
@@ -18,15 +19,19 @@ import (
 const appName = "cold2warm"
 
 var cli struct {
-	S3     bucketmgr.Config `embed:"" prefix:"s3-" envprefix:"S3_"`
-	Worker worker.Config    `embed:"" prefix:"worker-" envprefix:"WORKER_"`
-	Log    slogger.Config   `embed:"" prefix:"log-" envprefix:"LOG_"`
+	Worker  worker.Config    `embed:""`
+	S3      bucketmgr.Config `embed:"" prefix:"s3-" envprefix:"S3_"`
+	Log     slogger.Config   `embed:"" prefix:"log-" envprefix:"LOG_"`
+	Version kong.VersionFlag `name:"version" help:"Print version information and exit"`
 }
 
 func main() {
 	kongCtx := kong.Parse(&cli,
 		kong.Name(appName),
 		kong.Description("A CLI tool to bulk-restore S3 objects from archival storage classes using concurrent goroutines."),
+		kong.Vars{
+			"version": version.Version,
+		},
 	)
 
 	kongCtx.FatalIfErrorf(kongCtx.Error)
@@ -57,10 +62,19 @@ func main() {
 		"dry_run", cli.Worker.DryRun,
 	)
 
-	worker.Start(ctx, cli.Worker, s3Client)
+	startTime := time.Now()
+	summary := worker.Start(ctx, cli.Worker, s3Client)
 	if ctx.Err() == context.Canceled {
 		slog.Error("Operation cancelled by user")
-		return
 	}
-	slog.Info("Job completed successfully")
+
+	slog.Info("Summary",
+		"avg_obj_size", humanize.Bytes(uint64(summary.AvgObjectSize)),
+		"elapsed_time", time.Since(startTime).Round(time.Second).String(),
+		"failed_restore_count", summary.FailedRestore,
+		"inprogress_restore_count", summary.InProgressRestore,
+		"total_inprogress_object_size", humanize.Bytes(uint64(summary.TotalInProgressObjectsSize)),
+		"total_objects_count", summary.TotalObjects,
+		"total_objects_size", humanize.Bytes(uint64(summary.TotalObjectsSize)),
+	)
 }
