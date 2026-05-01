@@ -1,4 +1,4 @@
-FROM golang:1.26.0 AS app_builder
+FROM golang:1.26.2 AS app_builder
 WORKDIR /app
 RUN curl -sL https://taskfile.dev/install.sh | sh
 COPY go.mod go.sum ./
@@ -6,7 +6,7 @@ RUN go mod download
 COPY . .
 RUN /app/bin/task build
 
-FROM alpine:3.23.3
+FROM alpine:3.23.4
 RUN apk update && apk add --no-cache ca-certificates
 WORKDIR /
 COPY --from=app_builder /app/dist/cold2warm .
